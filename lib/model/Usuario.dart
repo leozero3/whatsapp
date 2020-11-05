@@ -5,6 +5,7 @@ class Usuario {
 
   Usuario();
 
+
   String get senha => _senha;
 
   set senha(String value) {
