@@ -47,10 +47,11 @@ class _LoginState extends State<Login> {
   _logarUsuario(Usuario usuario) {
     FirebaseAuth auth = FirebaseAuth.instance;
 
-    auth
-        .signInWithEmailAndPassword(
-            email: usuario.email, password: usuario.senha)
+    auth.signInWithEmailAndPassword(
+        email: usuario.email,
+        password: usuario.senha)
         .then((firebaseUser) {
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(

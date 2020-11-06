@@ -18,6 +18,7 @@ class _CadastroState extends State<Cadastro> {
 
   String _mensagemErro = '';
 
+
   ///valida  nome/email/senha
   _validarCampos() {
     //recupera dados dos campos
@@ -26,8 +27,11 @@ class _CadastroState extends State<Cadastro> {
     String senha = _controllerSenha.text;
 
     if (nome.length >= 3) {
+
       if (email.isNotEmpty && email.contains('@')) {
+
         if (senha.length >= 6) {
+
           setState(() {
             _mensagemErro = '';
           });
@@ -38,38 +42,43 @@ class _CadastroState extends State<Cadastro> {
           usuario.senha = senha;
 
           _cadastrarUsuario(usuario);
+
+
         } else {
           setState(() {
             _mensagemErro = 'Preencha a senha';
           });
         }
+
       } else {
         setState(() {
           _mensagemErro = 'Preencha o Email';
         });
       }
+
     } else {
       setState(() {
         _mensagemErro = 'Preencha o Nome';
       });
     }
+
   }
 
   _cadastrarUsuario(Usuario usuario) {
+
     FirebaseAuth auth = FirebaseAuth.instance; // simplifica o codigo pra 'auth'
 
-    auth
-        .createUserWithEmailAndPassword(
-            email: usuario.email, password: usuario.senha)
+    auth.createUserWithEmailAndPassword(
+        email: usuario.email,
+        password: usuario.senha)
         .then((firebaseUser) {
+
       //Salvar dados do usuario
       FirebaseFirestore db = FirebaseFirestore.instance;
 
       db.collection('usuarios')
-          .doc(FirebaseAuth.instance.currentUser.uid)
-          .set(
-        usuario.toMap()
-      );
+          .doc(firebaseUser.user.uid)
+          .set(usuario.toMap());
 
       Navigator.pushReplacement(
         context,
@@ -77,7 +86,8 @@ class _CadastroState extends State<Cadastro> {
           builder: (context) => Home(),
         ),
       );
-    }).catchError((erro) {
+    }).catchError((error) {
+      print("erro app: " + error.toString() );
       setState(() {
         _mensagemErro = 'erro ao cadastrar usuario';
       });
