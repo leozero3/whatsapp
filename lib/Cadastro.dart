@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:whatsapp/Home.dart';
@@ -58,9 +59,19 @@ class _CadastroState extends State<Cadastro> {
     FirebaseAuth auth = FirebaseAuth.instance; // simplifica o codigo pra 'auth'
 
     auth
-        .createUserWithEmailAndPassword(email: usuario.email, password: usuario.senha)
+        .createUserWithEmailAndPassword(
+            email: usuario.email, password: usuario.senha)
         .then((firebaseUser) {
-      Navigator.push(
+      //Salvar dados do usuario
+      FirebaseFirestore db = FirebaseFirestore.instance;
+
+      db.collection('usuarios')
+          .doc(FirebaseAuth.instance.currentUser.uid)
+          .set(
+        usuario.toMap()
+      );
+
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => Home(),
@@ -107,7 +118,8 @@ class _CadastroState extends State<Cadastro> {
                         hintText: 'Nome',
                         filled: true,
                         fillColor: Colors.white,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32))),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(32))),
                   ),
                 ),
                 Padding(
@@ -121,7 +133,8 @@ class _CadastroState extends State<Cadastro> {
                         hintText: 'E-mail',
                         filled: true,
                         fillColor: Colors.white,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32))),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(32))),
                   ),
                 ),
                 TextFormField(
@@ -134,7 +147,8 @@ class _CadastroState extends State<Cadastro> {
                       hintText: 'Senha',
                       filled: true,
                       fillColor: Colors.white,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(32))),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(32))),
                 ),
                 Padding(
                   padding: EdgeInsets.only(top: 16, bottom: 10),
@@ -145,7 +159,8 @@ class _CadastroState extends State<Cadastro> {
                     ),
                     color: Colors.green,
                     padding: EdgeInsets.fromLTRB(32, 16, 32, 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(32)),
                     onPressed: () {
                       _validarCampos();
                     },

@@ -48,9 +48,10 @@ class _LoginState extends State<Login> {
     FirebaseAuth auth = FirebaseAuth.instance;
 
     auth
-        .signInWithEmailAndPassword(email: usuario.email, password: usuario.senha)
+        .signInWithEmailAndPassword(
+            email: usuario.email, password: usuario.senha)
         .then((firebaseUser) {
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => Home(),
@@ -64,12 +65,12 @@ class _LoginState extends State<Login> {
   }
 
   Future _verificarUsuarioLogado() async {
-
     FirebaseAuth auth = FirebaseAuth.instance;
+    //auth.signOut();
 
     User usuarioLogado = await auth.currentUser;
-    if(usuarioLogado != null ){
-      Navigator.push(
+    if (usuarioLogado != null) {
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => Home(),
@@ -80,7 +81,6 @@ class _LoginState extends State<Login> {
 
   @override
   void initState() {
-
     _verificarUsuarioLogado();
     super.initState();
   }
@@ -118,7 +118,8 @@ class _LoginState extends State<Login> {
                         hintText: 'E-mail',
                         filled: true,
                         fillColor: Colors.white,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32))),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(32))),
                   ),
                 ),
 
@@ -132,7 +133,8 @@ class _LoginState extends State<Login> {
                       hintText: 'Senha',
                       filled: true,
                       fillColor: Colors.white,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(32))),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(32))),
                 ),
 
                 ///======================================================================
@@ -145,7 +147,8 @@ class _LoginState extends State<Login> {
                       ),
                       color: Colors.green,
                       padding: EdgeInsets.fromLTRB(32, 16, 32, 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(32)),
                       onPressed: () {
                         _validarCampos();
                       }),
