@@ -70,13 +70,10 @@ class _LoginState extends State<Login> {
     //auth.signOut();
 
     User usuarioLogado = await auth.currentUser;
+
     if (usuarioLogado != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Home(),
-        ),
-      );
+
+      Navigator.pushReplacementNamed(context, '/home');
     }
   }
 
