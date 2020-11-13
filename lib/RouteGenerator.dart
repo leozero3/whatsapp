@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:whatsapp/Cadastro.dart';
+import 'package:whatsapp/Configuracoes.dart';
 import 'package:whatsapp/Home.dart';
 import 'package:whatsapp/Login.dart';
 
@@ -21,6 +22,10 @@ class RouteGenerator {
       case '/home':
         return MaterialPageRoute(
           builder: (_) => Home(),
+        );
+      case '/configuracoes':
+        return MaterialPageRoute(
+          builder: (_) => Configuracoes(),
         );
       default :
         _erroRota();
