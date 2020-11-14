@@ -1,6 +1,8 @@
+import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 
 class Configuracoes extends StatefulWidget {
   @override
@@ -10,31 +12,85 @@ class Configuracoes extends StatefulWidget {
 class _ConfiguracoesState extends State<Configuracoes> {
 
   TextEditingController _controllerNome = TextEditingController();
-  final ImagePicker picker = ImagePicker();
-
+  final _picker = ImagePicker();
+  String _idUsuarioLogado;
   PickedFile _imagem;
+  bool _subindoImagem = false;
+  String _urlImagemRecuperada;
 
- ///
+  ///==========================================================
   Future _recuperarImagem(String origemImagem) async {
 
-    PickedFile imagemSelecionada;
+    PickedFile imagemSelecionada;  ///*
 
-    switch ( origemImagem ){
-      case 'camera' :
-        imagemSelecionada = await picker.getImage(source: ImageSource.camera);
+    switch (origemImagem) {
+      case 'camera':
+        imagemSelecionada = (await _picker.getImage(source: ImageSource.camera));
         break;
-      case 'galeria' :
-        imagemSelecionada = await picker.getImage(source: ImageSource.gallery);
+      case 'galeria':
+        imagemSelecionada = (await _picker.getImage(source: ImageSource.gallery));
         break;
     }
 
     setState(() {
       _imagem = imagemSelecionada;
+      if (_imagem != null) {
+        _subindoImagem = true;
+        _uploadImagem();
+      }
     });
-
-
   }
 
+  Future _uploadImagem() async {
+
+    var file = File(_imagem.path); ///*
+
+    FirebaseStorage storage = FirebaseStorage.instance;
+    Reference pastaRaiz = storage.ref();
+    Reference arquivo = pastaRaiz.child('perfil').child(_idUsuarioLogado + '.jpg');
+
+    ///upload da imagem
+    UploadTask task = arquivo.putFile(file);
+
+    ///controlar progresso do upload
+
+    task.snapshotEvents.listen((TaskSnapshot storageEvent) {
+      if (storageEvent.state == TaskState.running) {
+        setState(() {
+          _subindoImagem = true;
+        });
+      } else if (storageEvent.state == TaskState.success) {
+        _subindoImagem = false;
+      }
+    });
+
+    //Recuperar URL da imagem
+    task.then((TaskSnapshot taskSnapshot) {
+      _recuperarUrlImagem(taskSnapshot);
+    });
+  }
+
+  Future _recuperarUrlImagem(TaskSnapshot snapshot) async {
+    String url = await snapshot.ref.getDownloadURL();
+
+    setState(() {
+      _urlImagemRecuperada = url;
+    });
+  }
+
+  _recuperarDadosUsuario() async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User usuarioLogado = await auth.currentUser;
+    _idUsuarioLogado = usuarioLogado.uid;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _recuperarDadosUsuario();
+  }
+
+  ///=============
 
   @override
   Widget build(BuildContext context) {
@@ -48,12 +104,12 @@ class _ConfiguracoesState extends State<Configuracoes> {
           child: SingleChildScrollView(
             child: Column(
               children: [
+                _subindoImagem ? CircularProgressIndicator() : Container(),
                 CircleAvatar(
                   radius: 100,
                   backgroundColor: Colors.grey,
-                  backgroundImage: NetworkImage(
-                      'https://firebasestorage.googleapis.com/v0/b/whatsapp-1d406.appspot.com/o/'
-                      'perfil%2Fperfil2.jpg?alt=media&token=b1536f4d-cc3b-41f1-9465-050f398c1196'),
+                  backgroundImage:
+                      _urlImagemRecuperada != null ? NetworkImage(_urlImagemRecuperada) : null,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -84,8 +140,7 @@ class _ConfiguracoesState extends State<Configuracoes> {
                         hintText: 'Nome',
                         filled: true,
                         fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(32))),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32))),
                   ),
                 ),
                 Padding(
@@ -97,8 +152,7 @@ class _ConfiguracoesState extends State<Configuracoes> {
                     ),
                     color: Colors.green,
                     padding: EdgeInsets.fromLTRB(32, 16, 32, 16),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(32)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
                     onPressed: () {
                       //_validarCampos();
                     },
