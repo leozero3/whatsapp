@@ -26,32 +26,6 @@ class _LoginState extends State<Login> {
           _mensagemErro = '';
         });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         Usuario usuario = Usuario();
         usuario.email = email;
         usuario.senha = senha;

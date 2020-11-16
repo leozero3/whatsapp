@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Configuracoes extends StatefulWidget {
   @override
@@ -10,7 +11,6 @@ class Configuracoes extends StatefulWidget {
 }
 
 class _ConfiguracoesState extends State<Configuracoes> {
-
   TextEditingController _controllerNome = TextEditingController();
   final _picker = ImagePicker();
   String _idUsuarioLogado;
@@ -20,8 +20,9 @@ class _ConfiguracoesState extends State<Configuracoes> {
 
   ///==========================================================
   Future _recuperarImagem(String origemImagem) async {
+    PickedFile imagemSelecionada;
 
-    PickedFile imagemSelecionada;  ///*
+    ///*
 
     switch (origemImagem) {
       case 'camera':
@@ -42,8 +43,9 @@ class _ConfiguracoesState extends State<Configuracoes> {
   }
 
   Future _uploadImagem() async {
+    var file = File(_imagem.path);
 
-    var file = File(_imagem.path); ///*
+    ///*
 
     FirebaseStorage storage = FirebaseStorage.instance;
     Reference pastaRaiz = storage.ref();
@@ -72,16 +74,48 @@ class _ConfiguracoesState extends State<Configuracoes> {
 
   Future _recuperarUrlImagem(TaskSnapshot snapshot) async {
     String url = await snapshot.ref.getDownloadURL();
+    _atualizarUrlImagemFirestore(url);
 
     setState(() {
       _urlImagemRecuperada = url;
     });
   }
 
+  _atualizarUrlImagemFirestore(String url) {
+    FirebaseFirestore db = FirebaseFirestore.instance;
+
+    Map<String, dynamic> dadosAtualizar = {'urlImagem': url};
+
+    db.collection('usuarios').doc(_idUsuarioLogado).update(dadosAtualizar);
+  }
+
+  _atualizarNomeFirestore() {
+    String nome = _controllerNome.text;
+
+    FirebaseFirestore db = FirebaseFirestore.instance;
+
+    Map<String, dynamic> dadosAtualizar = {'nome': nome};
+
+    db.collection('usuarios').doc(_idUsuarioLogado).update(dadosAtualizar);
+  }
+
   _recuperarDadosUsuario() async {
     FirebaseAuth auth = FirebaseAuth.instance;
     User usuarioLogado = await auth.currentUser;
     _idUsuarioLogado = usuarioLogado.uid;
+
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    DocumentSnapshot snapshot = await db.collection('usuarios').doc(_idUsuarioLogado).get();
+
+    Map<String, dynamic> dados = snapshot.data();
+    _controllerNome.text = dados['nome'];
+
+    if (dados['urlImagem'] != null) {
+      setState(() {
+        _urlImagemRecuperada = dados['urlImagem'];
+      });
+
+    }
   }
 
   @override
@@ -104,7 +138,10 @@ class _ConfiguracoesState extends State<Configuracoes> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                _subindoImagem ? CircularProgressIndicator() : Container(),
+                Container(
+                  padding: EdgeInsets.all(16),
+                  child: _subindoImagem ? CircularProgressIndicator() : Container(),
+                ),
                 CircleAvatar(
                   radius: 100,
                   backgroundColor: Colors.grey,
@@ -154,7 +191,7 @@ class _ConfiguracoesState extends State<Configuracoes> {
                     padding: EdgeInsets.fromLTRB(32, 16, 32, 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
                     onPressed: () {
-                      //_validarCampos();
+                      _atualizarNomeFirestore();
                     },
                   ),
                 ),
