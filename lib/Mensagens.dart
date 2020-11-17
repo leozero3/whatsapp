@@ -11,6 +11,17 @@ class Mensagens extends StatefulWidget {
 }
 
 class _MensagensState extends State<Mensagens> {
+  List<String> listaMensagens = [
+    'Na caminhada da vida, ',
+    'aprendi que nem sempre temos o que queremos. ',
+    'Porque nem sempre o que queremos nos faz bem.',
+    'Foi preciso sentir dor,',
+    ' para queeu aprendesse com as lágrimas.',
+    'Foi necessário o riso, para que eu não me enclausurasse com o tempo.',
+    'E a vitória sem conquista é ilusão.',
+    'E a maior virtude dos fortes é o perdão.',
+  ];
+
   TextEditingController _controllerMensagem = TextEditingController();
 
   _enviarMensagem() {}
@@ -39,9 +50,7 @@ class _MensagensState extends State<Mensagens> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(32),
                   ),
-                  prefixIcon: IconButton(
-                      icon: Icon(Icons.camera_alt),
-                      onPressed: _enviarFoto),
+                  prefixIcon: IconButton(icon: Icon(Icons.camera_alt), onPressed: _enviarFoto),
                 ),
               ),
             ),
@@ -53,6 +62,44 @@ class _MensagensState extends State<Mensagens> {
             mini: true,
           )
         ],
+      ),
+    );
+
+    var listView = Expanded(
+      child: ListView.builder(
+        itemCount: listaMensagens.length,
+        itemBuilder: (context, indice) {
+
+          double larguraContainer = MediaQuery.of(context).size.width * 0.8;
+
+          Alignment alinhamento = Alignment.centerRight;
+          Color cor = Color(0xffd2ffa5);
+          if ( indice % 2  == 0){
+            alinhamento = Alignment.centerLeft;
+            cor = Colors.white;
+
+          }
+
+
+          return Align(
+            alignment: alinhamento,
+            child: Padding(
+              padding: EdgeInsets.all(6),
+              child: Container(
+                width: larguraContainer,
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: cor,
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                ),
+                child: Text(
+                  listaMensagens[indice],
+                  style: TextStyle(fontSize: 17),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
 
@@ -71,7 +118,7 @@ class _MensagensState extends State<Mensagens> {
           padding: EdgeInsets.all(16),
           child: Column(
             children: [
-              Text('list'),
+              listView,
               caixaMensagem,
             ],
           ),
