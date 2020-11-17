@@ -9,7 +9,6 @@ class AbaContatos extends StatefulWidget {
 }
 
 class _AbaContatosState extends State<AbaContatos> {
-
   String _idUsuarioLogado;
   String _emailUsuarioLogado;
 
@@ -21,9 +20,8 @@ class _AbaContatosState extends State<AbaContatos> {
     List<Usuario> listaUsuarios = List();
 
     for (DocumentSnapshot item in querySnapshot.docs) {
-
       var dados = item.data();
-      if( dados['email'] == _emailUsuarioLogado ) continue;
+      if (dados['email'] == _emailUsuarioLogado) continue;
 
       Usuario usuario = Usuario();
       usuario.email = dados['email'];
@@ -40,7 +38,6 @@ class _AbaContatosState extends State<AbaContatos> {
     User usuarioLogado = await auth.currentUser;
     _idUsuarioLogado = usuarioLogado.uid;
     _emailUsuarioLogado = usuarioLogado.email;
-
   }
 
   @override
@@ -55,7 +52,6 @@ class _AbaContatosState extends State<AbaContatos> {
       future: _recuperarContatos(),
       // ignore: missing_return
       builder: (context, snapshot) {
-
         switch (snapshot.connectionState) {
           case ConnectionState.none:
 
@@ -81,12 +77,20 @@ class _AbaContatosState extends State<AbaContatos> {
                 Usuario usuario = listaItens[indice];
 
                 return ListTile(
+                  onTap: () {
+                    Navigator.pushNamed(
+                      context,
+                      '/mensagens',
+                      arguments: usuario,
+                    );
+                  },
                   contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),
                   leading: CircleAvatar(
                       maxRadius: 30,
                       backgroundColor: Colors.grey,
-                      backgroundImage:
-                          usuario.urlImagem != null ? NetworkImage(usuario.urlImagem) : null),
+                      backgroundImage: usuario.urlImagem != null
+                          ? NetworkImage(usuario.urlImagem)
+                          : null),
                   title: Text(
                     usuario.nome,
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
