@@ -1,54 +1,58 @@
 import 'package:flutter/material.dart';
-import 'package:whatsapp/Cadastro.dart';
-import 'package:whatsapp/Configuracoes.dart';
-import 'package:whatsapp/Home.dart';
-import 'package:whatsapp/Login.dart';
-import 'package:whatsapp/Mensagens.dart';
+import 'Cadastro.dart';
+import 'Configuracoes.dart';
+import 'Home.dart';
+import 'Login.dart';
+import 'Mensagens.dart';
 
 class RouteGenerator {
-  static Route<dynamic> generateRoute(RouteSettings settings) {
+
+  static Route<dynamic> generateRoute(RouteSettings settings){
 
     final args = settings.arguments;
 
-    switch (settings.name) {
-      case '/':
+    switch( settings.name ){
+      case "/" :
         return MaterialPageRoute(
-          builder: (_) => Login(),
+            builder: (_) => Login()
         );
-      case '/login':
+      case "/login" :
         return MaterialPageRoute(
-          builder: (_) => Login(),
+            builder: (_) => Login()
         );
-      case '/cadastro':
+      case "/cadastro" :
         return MaterialPageRoute(
-          builder: (_) => Cadastro(),
+            builder: (_) => Cadastro()
         );
-      case '/home':
+      case "/home" :
         return MaterialPageRoute(
-          builder: (_) => Home(),
+            builder: (_) => Home()
         );
-      case '/configuracoes':
+      case "/configuracoes" :
         return MaterialPageRoute(
-          builder: (_) => Configuracoes(),
+            builder: (_) => Configuracoes()
         );
-      case '/mensagens':
+      case "/mensagens" :
         return MaterialPageRoute(
-          builder: (_) => Mensagens(args),
+            builder: (_) => Mensagens(args)
         );
-      default :
+      default:
         _erroRota();
     }
+
   }
+
   static Route<dynamic> _erroRota(){
-    return MaterialPageRoute(builder: (_){
-      return Scaffold(
-        appBar: AppBar(
-          title: Text('Tela Não encontrada!'),
-        ),
-        body: Center(
-          child: Text('Tela Não encontrada!'),
-        ),
-      );
-    });
+    return MaterialPageRoute(
+        builder: (_){
+          return Scaffold(
+            appBar: AppBar(title: Text("Tela não encontrada!"),),
+            body: Center(
+              child: Text("Tela não encontrada!"),
+            ),
+          );
+        }
+    );
   }
+
 }

@@ -40,7 +40,9 @@ class _AbaConversasState extends State<AbaConversas> {
     return ListView.builder(
         itemCount: listaConversas.length,
         itemBuilder: (context, indice) {
+
           Conversa conversa = listaConversas[indice];
+
           return ListTile(
             contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),
             leading: CircleAvatar(

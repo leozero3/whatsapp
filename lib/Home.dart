@@ -24,8 +24,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   }
 
   Future _verificarUsuarioLogado() async {
+
     FirebaseAuth auth = FirebaseAuth.instance;
+
     User usuarioLogado = await auth.currentUser;
+
     if (usuarioLogado == null) {
       Navigator.pushReplacementNamed(context, '/login');
     }
@@ -69,12 +72,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           labelStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           controller: _tabController,
           tabs: [
-            Tab(
-              text: 'Conversas',
-            ),
-            Tab(
-              text: 'Contatos',
-            ),
+            Tab(text: 'Conversas'),
+            Tab(text: 'Contatos'),
           ],
         ),
         actions: [

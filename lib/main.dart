@@ -8,8 +8,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  //FirebaseFirestore.instance.collection('collectionPath').doc('3').set({'Nome': 'isaac'});
-
   runApp(MaterialApp(
     home: Login(),
     theme: ThemeData(

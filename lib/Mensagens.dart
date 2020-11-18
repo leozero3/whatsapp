@@ -15,7 +15,6 @@ class Mensagens extends StatefulWidget {
 
 String _idUsuarioLogado;
 String _idUsuarioDestinatario;
-
 FirebaseFirestore db = FirebaseFirestore.instance;
 
 class _MensagensState extends State<Mensagens> {
@@ -45,13 +44,8 @@ class _MensagensState extends State<Mensagens> {
     }
   }
 
-  _salvarMesagem(
-      String idRemetente, String idDestinatario, Mensagem msg) async {
-    await db
-        .collection('mensagens')
-        .doc(idRemetente)
-        .collection(idDestinatario)
-        .add(msg.toMap());
+  _salvarMesagem(String idRemetente, String idDestinatario, Mensagem msg) async {
+    await db.collection('mensagens').doc(idRemetente).collection(idDestinatario).add(msg.toMap());
 
     //Limpa caixa de texto
     _controllerMensagem.clear();
@@ -61,7 +55,7 @@ class _MensagensState extends State<Mensagens> {
 
   _recuperarDadosUsuario() async {
     FirebaseAuth auth = FirebaseAuth.instance;
-    User usuarioLogado = await auth.currentUser;
+    User usuarioLogado = auth.currentUser;
     _idUsuarioLogado = usuarioLogado.uid;
 
     _idUsuarioDestinatario = widget.contato.idUsuario;
@@ -96,8 +90,7 @@ class _MensagensState extends State<Mensagens> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(32),
                   ),
-                  prefixIcon: IconButton(
-                      icon: Icon(Icons.camera_alt), onPressed: _enviarFoto),
+                  prefixIcon: IconButton(icon: Icon(Icons.camera_alt), onPressed: _enviarFoto),
                 ),
               ),
             ),
@@ -125,10 +118,7 @@ class _MensagensState extends State<Mensagens> {
           case ConnectionState.waiting:
             return Center(
               child: Column(
-                children: <Widget>[
-                  Text("Carregando mensagens"),
-                  CircularProgressIndicator()
-                ],
+                children: <Widget>[Text("Carregando mensagens"), CircularProgressIndicator()],
               ),
             );
             break;
@@ -146,12 +136,10 @@ class _MensagensState extends State<Mensagens> {
                     itemCount: querySnapshot.docs.length,
                     itemBuilder: (context, indice) {
                       //recupera mensagem
-                      List<DocumentSnapshot> mensagens =
-                          querySnapshot.docs.toList();
+                      List<DocumentSnapshot> mensagens = querySnapshot.docs.toList();
                       DocumentSnapshot item = mensagens[indice];
 
-                      double larguraContainer =
-                          MediaQuery.of(context).size.width * 0.8;
+                      double larguraContainer = MediaQuery.of(context).size.width * 0.8;
 
                       //Define cores e alinhamentos
                       Alignment alinhamento = Alignment.centerRight;
@@ -169,9 +157,7 @@ class _MensagensState extends State<Mensagens> {
                             width: larguraContainer,
                             padding: EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                                color: cor,
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(8))),
+                                color: cor, borderRadius: BorderRadius.all(Radius.circular(8))),
                             child: Text(
                               item["mensagem"],
                               style: TextStyle(fontSize: 18),
@@ -182,53 +168,16 @@ class _MensagensState extends State<Mensagens> {
                     }),
               );
             }
-
             break;
         }
       },
     );
 
-    var listView = Expanded(
-      child: ListView.builder(
-          itemCount: listaMensagens.length,
-          itemBuilder: (context, indice) {
-            double larguraContainer = MediaQuery.of(context).size.width * 0.8;
-
-            //Define cores e alinhamentos
-            Alignment alinhamento = Alignment.centerRight;
-            Color cor = Color(0xffd2ffa5);
-            if (indice % 2 == 0) {
-              //par
-              alinhamento = Alignment.centerLeft;
-              cor = Colors.white;
-            }
-
-            return Align(
-              alignment: alinhamento,
-              child: Padding(
-                padding: EdgeInsets.all(6),
-                child: Container(
-                  width: larguraContainer,
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                      color: cor,
-                      borderRadius: BorderRadius.all(Radius.circular(8))),
-                  child: Text(
-                    listaMensagens[indice],
-                    style: TextStyle(fontSize: 18),
-                  ),
-                ),
-              ),
-            );
-          }),
-    );
-
-
     /// CORPO DA PAGINA ========================================================
     return Scaffold(
       appBar: AppBar(
         title: Row(
-          children: [
+          children: <Widget>[
             CircleAvatar(
                 maxRadius: 20,
                 backgroundColor: Colors.grey,
@@ -236,25 +185,21 @@ class _MensagensState extends State<Mensagens> {
                     ? NetworkImage(widget.contato.urlImagem)
                     : null),
             Padding(
-              padding: EdgeInsets.only(left: 10),
+              padding: EdgeInsets.only(left: 8),
               child: Text(widget.contato.nome),
-            ),
+            )
           ],
         ),
       ),
       body: Container(
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/imagens/bg.png'),
-            fit: BoxFit.cover,
-          ),
-        ),
+            image: DecorationImage(image: AssetImage("assets/imagens/bg.png"), fit: BoxFit.cover)),
         child: SafeArea(
           child: Container(
-            padding: EdgeInsets.all(16),
+            padding: EdgeInsets.all(8),
             child: Column(
-              children: [
+              children: <Widget>[
                 stream,
                 caixaMensagem,
               ],

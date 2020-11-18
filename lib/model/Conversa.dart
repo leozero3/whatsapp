@@ -1,11 +1,12 @@
 
 class Conversa {
+
   String _nome;
-
-  Conversa(this._nome, this._mensagem, this._caminhoFoto);
-
   String _mensagem;
   String _caminhoFoto;
+
+
+  Conversa(this._nome, this._mensagem, this._caminhoFoto);
 
   String get nome => _nome;
 
@@ -24,4 +25,6 @@ class Conversa {
   set mensagem(String value) {
     _mensagem = value;
   }
+
+
 }

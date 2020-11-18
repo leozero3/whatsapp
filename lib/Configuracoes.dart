@@ -11,6 +11,7 @@ class Configuracoes extends StatefulWidget {
 }
 
 class _ConfiguracoesState extends State<Configuracoes> {
+
   TextEditingController _controllerNome = TextEditingController();
   final _picker = ImagePicker();
   String _idUsuarioLogado;
@@ -100,12 +101,15 @@ class _ConfiguracoesState extends State<Configuracoes> {
   }
 
   _recuperarDadosUsuario() async {
+
     FirebaseAuth auth = FirebaseAuth.instance;
     User usuarioLogado = await auth.currentUser;
     _idUsuarioLogado = usuarioLogado.uid;
 
     FirebaseFirestore db = FirebaseFirestore.instance;
-    DocumentSnapshot snapshot = await db.collection('usuarios').doc(_idUsuarioLogado).get();
+    DocumentSnapshot snapshot = await db.collection('usuarios')
+        .doc(_idUsuarioLogado)
+        .get();
 
     Map<String, dynamic> dados = snapshot.data();
     _controllerNome.text = dados['nome'];
@@ -128,72 +132,79 @@ class _ConfiguracoesState extends State<Configuracoes> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Configurações'),
-      ),
+      appBar: AppBar(title: Text("Configurações"),),
       body: Container(
         padding: EdgeInsets.all(16),
         child: Center(
           child: SingleChildScrollView(
             child: Column(
-              children: [
+              children: <Widget>[
                 Container(
                   padding: EdgeInsets.all(16),
-                  child: _subindoImagem ? CircularProgressIndicator() : Container(),
+                  child: _subindoImagem
+                      ? CircularProgressIndicator()
+                      : Container(),
                 ),
                 CircleAvatar(
-                  radius: 100,
-                  backgroundColor: Colors.grey,
-                  backgroundImage:
-                      _urlImagemRecuperada != null ? NetworkImage(_urlImagemRecuperada) : null,
+                    radius: 100,
+                    backgroundColor: Colors.grey,
+                    backgroundImage:
+                    _urlImagemRecuperada != null
+                        ? NetworkImage(_urlImagemRecuperada)
+                        : null
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
+                  children: <Widget>[
                     FlatButton(
-                      onPressed: () {
-                        _recuperarImagem('camera');
+                      child: Text("Câmera"),
+                      onPressed: (){
+                        _recuperarImagem("camera");
                       },
-                      child: Text('Câmera'),
                     ),
                     FlatButton(
-                      onPressed: () {
-                        _recuperarImagem('galeria');
+                      child: Text("Galeria"),
+                      onPressed: (){
+                        _recuperarImagem("galeria");
                       },
-                      child: Text('Galeria'),
-                    ),
+                    )
                   ],
                 ),
                 Padding(
                   padding: EdgeInsets.only(bottom: 8),
-                  child: TextFormField(
+                  child: TextField(
                     controller: _controllerNome,
                     autofocus: true,
                     keyboardType: TextInputType.text,
                     style: TextStyle(fontSize: 20),
+                    /*onChanged: (texto){
+                      _atualizarNomeFirestore(texto);
+                    },*/
                     decoration: InputDecoration(
                         contentPadding: EdgeInsets.fromLTRB(32, 16, 32, 16),
-                        hintText: 'Nome',
+                        hintText: "Nome",
                         filled: true,
                         fillColor: Colors.white,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32))),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(32))),
                   ),
                 ),
                 Padding(
                   padding: EdgeInsets.only(top: 16, bottom: 10),
                   child: RaisedButton(
-                    child: Text(
-                      'Salvar',
-                      style: TextStyle(color: Colors.white, fontSize: 20),
-                    ),
-                    color: Colors.green,
-                    padding: EdgeInsets.fromLTRB(32, 16, 32, 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
-                    onPressed: () {
-                      _atualizarNomeFirestore();
-                    },
+                      child: Text(
+                        "Salvar",
+                        style: TextStyle(color: Colors.white, fontSize: 20),
+                      ),
+                      color: Colors.green,
+                      padding: EdgeInsets.fromLTRB(32, 16, 32, 16),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(32)),
+                      onPressed: () {
+                        _atualizarNomeFirestore();
+                      }
                   ),
-                ),
+                )
               ],
             ),
           ),
