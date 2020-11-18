@@ -23,9 +23,18 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     });
   }
 
+  Future _verificarUsuarioLogado() async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User usuarioLogado = await auth.currentUser;
+    if (usuarioLogado == null) {
+      Navigator.pushReplacementNamed(context, '/login');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _verificarUsuarioLogado();
     _recuperarDadosUser();
     _tabController = TabController(length: 2, vsync: this);
   }

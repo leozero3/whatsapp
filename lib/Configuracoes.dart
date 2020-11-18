@@ -114,7 +114,6 @@ class _ConfiguracoesState extends State<Configuracoes> {
       setState(() {
         _urlImagemRecuperada = dados['urlImagem'];
       });
-
     }
   }
 
