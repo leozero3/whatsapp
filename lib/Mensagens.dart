@@ -18,16 +18,6 @@ String _idUsuarioDestinatario;
 FirebaseFirestore db = FirebaseFirestore.instance;
 
 class _MensagensState extends State<Mensagens> {
-  List<String> listaMensagens = [
-    'Na caminhada da vida, ',
-    'aprendi que nem sempre temos o que queremos. ',
-    'Porque nem sempre o que queremos nos faz bem.',
-    'Foi preciso sentir dor,',
-    ' para queeu aprendesse com as lágrimas.',
-    'Foi necessário o riso, para que eu não me enclausurasse com o tempo.',
-    'E a vitória sem conquista é ilusão.',
-    'E a maior virtude dos fortes é o perdão.',
-  ];
 
   TextEditingController _controllerMensagem = TextEditingController();
 
@@ -41,17 +31,26 @@ class _MensagensState extends State<Mensagens> {
       mensagem.tipo = 'texto';
 
       _salvarMesagem(_idUsuarioLogado, _idUsuarioDestinatario, mensagem);
+
+      _salvarMesagem(_idUsuarioDestinatario, _idUsuarioLogado, mensagem);
     }
   }
 
-  _salvarMesagem(String idRemetente, String idDestinatario, Mensagem msg) async {
-    await db.collection('mensagens').doc(idRemetente).collection(idDestinatario).add(msg.toMap());
+  _salvarMesagem(
+      String idRemetente, String idDestinatario, Mensagem msg) async {
+    await db
+        .collection('mensagens')
+        .doc(idRemetente)
+        .collection(idDestinatario)
+        .add(msg.toMap());
 
     //Limpa caixa de texto
     _controllerMensagem.clear();
   }
 
-  _enviarFoto() {}
+  _enviarFoto() {
+
+  }
 
   _recuperarDadosUsuario() async {
     FirebaseAuth auth = FirebaseAuth.instance;
@@ -90,7 +89,11 @@ class _MensagensState extends State<Mensagens> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(32),
                   ),
-                  prefixIcon: IconButton(icon: Icon(Icons.camera_alt), onPressed: _enviarFoto),
+                  prefixIcon: IconButton(
+                      icon: Icon(
+                          Icons.camera_alt,
+                      ),
+                      onPressed: _enviarFoto),
                 ),
               ),
             ),
@@ -118,7 +121,10 @@ class _MensagensState extends State<Mensagens> {
           case ConnectionState.waiting:
             return Center(
               child: Column(
-                children: <Widget>[Text("Carregando mensagens"), CircularProgressIndicator()],
+                children: <Widget>[
+                  Text("Carregando mensagens"),
+                  CircularProgressIndicator()
+                ],
               ),
             );
             break;
@@ -136,10 +142,12 @@ class _MensagensState extends State<Mensagens> {
                     itemCount: querySnapshot.docs.length,
                     itemBuilder: (context, indice) {
                       //recupera mensagem
-                      List<DocumentSnapshot> mensagens = querySnapshot.docs.toList();
+                      List<DocumentSnapshot> mensagens =
+                          querySnapshot.docs.toList();
                       DocumentSnapshot item = mensagens[indice];
 
-                      double larguraContainer = MediaQuery.of(context).size.width * 0.8;
+                      double larguraContainer =
+                          MediaQuery.of(context).size.width * 0.8;
 
                       //Define cores e alinhamentos
                       Alignment alinhamento = Alignment.centerRight;
@@ -157,7 +165,9 @@ class _MensagensState extends State<Mensagens> {
                             width: larguraContainer,
                             padding: EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                                color: cor, borderRadius: BorderRadius.all(Radius.circular(8))),
+                                color: cor,
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(8))),
                             child: Text(
                               item["mensagem"],
                               style: TextStyle(fontSize: 18),
@@ -194,7 +204,8 @@ class _MensagensState extends State<Mensagens> {
       body: Container(
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
-            image: DecorationImage(image: AssetImage("assets/imagens/bg.png"), fit: BoxFit.cover)),
+            image: DecorationImage(
+                image: AssetImage("assets/imagens/bg.png"), fit: BoxFit.cover)),
         child: SafeArea(
           child: Container(
             padding: EdgeInsets.all(8),
