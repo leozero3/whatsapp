@@ -15,9 +15,7 @@ class Usuario {
       "nome" : this.nome,
       "email" : this.email
     };
-
     return map;
-
   }
 
 

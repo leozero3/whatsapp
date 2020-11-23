@@ -1,12 +1,42 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Conversa {
-
+  String _idRemetente;
+  String _idDestinatario;
   String _nome;
   String _mensagem;
   String _caminhoFoto;
+  String _tipoMensagem;
 
+  Conversa();
 
-  Conversa(this._nome, this._mensagem, this._caminhoFoto);
+  salvar() async {
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    await db
+        .collection('conversas')
+        .doc(this.idRemetente)
+        .collection('ultima_conversa')
+        .doc(this.idDestinatario).set(this.toMap());
+  }
+
+  Map<String, dynamic> toMap(){
+
+    Map<String, dynamic> map = {
+      "_idRemetente"        : this._idRemetente,
+      "_idDestinatario"     : this._idDestinatario,
+      "_nome"               : this._nome,
+      "_mensagem"           : this._mensagem,
+      "_caminhoFoto"        : this._caminhoFoto,
+      "_tipoMensagem"        : this._tipoMensagem,
+    };
+    return map;
+  }
+
+  String get idRemetente => _idRemetente;
+
+  set idRemetente(String value) {
+    _idRemetente = value;
+  }
 
   String get nome => _nome;
 
@@ -26,5 +56,15 @@ class Conversa {
     _mensagem = value;
   }
 
+  String get idDestinatario => _idDestinatario;
 
+  set idDestinatario(String value) {
+    _idDestinatario = value;
+  }
+
+  String get tipoMensagem => _tipoMensagem;
+
+  set tipoMensagem(String value) {
+    _tipoMensagem = value;
+  }
 }
