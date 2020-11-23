@@ -1,8 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:whatsapp/model/Mensagem.dart';
 import 'package:whatsapp/model/Usuario.dart';
+import 'dart:io';
 
 class Mensagens extends StatefulWidget {
   Usuario contato;
@@ -13,12 +16,13 @@ class Mensagens extends StatefulWidget {
   _MensagensState createState() => _MensagensState();
 }
 
-String _idUsuarioLogado;
-String _idUsuarioDestinatario;
-FirebaseFirestore db = FirebaseFirestore.instance;
-
 class _MensagensState extends State<Mensagens> {
 
+  final _picker = ImagePicker();
+  String _idUsuarioLogado;
+  String _idUsuarioDestinatario;
+  FirebaseFirestore db = FirebaseFirestore.instance;
+  bool _subindoImagem = false;
   TextEditingController _controllerMensagem = TextEditingController();
 
   _enviarMensagem() {
@@ -30,26 +34,75 @@ class _MensagensState extends State<Mensagens> {
       mensagem.urlImagem = '';
       mensagem.tipo = 'texto';
 
+      /// Salvar mensagem remetente
       _salvarMesagem(_idUsuarioLogado, _idUsuarioDestinatario, mensagem);
 
+      /// Salvar mensagem destinatario
       _salvarMesagem(_idUsuarioDestinatario, _idUsuarioLogado, mensagem);
     }
   }
 
-  _salvarMesagem(
-      String idRemetente, String idDestinatario, Mensagem msg) async {
-    await db
-        .collection('mensagens')
-        .doc(idRemetente)
-        .collection(idDestinatario)
-        .add(msg.toMap());
+  _salvarMesagem(String idRemetente, String idDestinatario, Mensagem msg) async {
+    await db.collection('mensagens').doc(idRemetente).collection(idDestinatario).add(msg.toMap());
 
     //Limpa caixa de texto
     _controllerMensagem.clear();
   }
 
-  _enviarFoto() {
+  _enviarFoto() async {
+    PickedFile imagemSelecionada;
+    imagemSelecionada = (await _picker.getImage(source: ImageSource.gallery));
 
+    String nomeImagem = DateTime.now().millisecondsSinceEpoch.toString();
+
+    _subindoImagem = true;
+
+    /// convert imagePicker em 'io'
+    var file = File(imagemSelecionada.path);
+
+    /// convert imagePicker em 'io'
+    FirebaseStorage storage = FirebaseStorage.instance;
+    Reference pastaRaiz = storage.ref();
+    Reference arquivo = pastaRaiz
+        .child('mensagens')
+        .child(_idUsuarioLogado)
+        .child(nomeImagem + '.jpg');
+
+    ///upload da imagem
+    UploadTask task = arquivo.putFile(file);
+
+    ///controlar progresso do upload
+
+    task.snapshotEvents.listen((TaskSnapshot storageEvent) {
+      if (storageEvent.state == TaskState.running) {
+        setState(() {
+          _subindoImagem = true;
+        });
+      } else if (storageEvent.state == TaskState.success) {
+        _subindoImagem = false;
+      }
+    });
+
+    ///Recuperar URL da imagem
+    task.then((TaskSnapshot taskSnapshot) {
+      _recuperarUrlImagem(taskSnapshot);
+    });
+  }
+
+  Future _recuperarUrlImagem(TaskSnapshot snapshot) async {
+    String url = await snapshot.ref.getDownloadURL();
+
+    Mensagem mensagem = Mensagem();
+    mensagem.idUsuario = _idUsuarioLogado;
+    mensagem.mensagem = '';
+    mensagem.urlImagem = url;
+    mensagem.tipo = 'imagem';
+
+    /// Salvar mensagem remetente
+    _salvarMesagem(_idUsuarioLogado, _idUsuarioDestinatario, mensagem);
+
+    /// Salvar mensagem destinatario
+    _salvarMesagem(_idUsuarioDestinatario, _idUsuarioLogado, mensagem);
   }
 
   _recuperarDadosUsuario() async {
@@ -89,11 +142,10 @@ class _MensagensState extends State<Mensagens> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(32),
                   ),
-                  prefixIcon: IconButton(
-                      icon: Icon(
-                          Icons.camera_alt,
-                      ),
-                      onPressed: _enviarFoto),
+                  prefixIcon:
+                  _subindoImagem
+                      ? CircularProgressIndicator()
+                      : IconButton(icon: Icon(Icons.camera_alt),onPressed: _enviarFoto),
                 ),
               ),
             ),
@@ -121,10 +173,7 @@ class _MensagensState extends State<Mensagens> {
           case ConnectionState.waiting:
             return Center(
               child: Column(
-                children: <Widget>[
-                  Text("Carregando mensagens"),
-                  CircularProgressIndicator()
-                ],
+                children: <Widget>[Text("Carregando mensagens"), CircularProgressIndicator()],
               ),
             );
             break;
@@ -142,12 +191,10 @@ class _MensagensState extends State<Mensagens> {
                     itemCount: querySnapshot.docs.length,
                     itemBuilder: (context, indice) {
                       //recupera mensagem
-                      List<DocumentSnapshot> mensagens =
-                          querySnapshot.docs.toList();
+                      List<DocumentSnapshot> mensagens = querySnapshot.docs.toList();
                       DocumentSnapshot item = mensagens[indice];
 
-                      double larguraContainer =
-                          MediaQuery.of(context).size.width * 0.8;
+                      double larguraContainer = MediaQuery.of(context).size.width * 0.8;
 
                       //Define cores e alinhamentos
                       Alignment alinhamento = Alignment.centerRight;
@@ -165,13 +212,11 @@ class _MensagensState extends State<Mensagens> {
                             width: larguraContainer,
                             padding: EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                                color: cor,
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(8))),
-                            child: Text(
-                              item["mensagem"],
-                              style: TextStyle(fontSize: 18),
-                            ),
+                                color: cor, borderRadius: BorderRadius.all(Radius.circular(8))),
+                            child: //Text(item["mensagem"], style: TextStyle(fontSize: 18),
+                            item["tipo"] == "texto"
+                                ? Text(item["mensagem"],style: TextStyle(fontSize: 18),)
+                                : Image.network(item["urlImagem"]),
                           ),
                         ),
                       );
@@ -204,8 +249,7 @@ class _MensagensState extends State<Mensagens> {
       body: Container(
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
-            image: DecorationImage(
-                image: AssetImage("assets/imagens/bg.png"), fit: BoxFit.cover)),
+            image: DecorationImage(image: AssetImage("assets/imagens/bg.png"), fit: BoxFit.cover)),
         child: SafeArea(
           child: Container(
             padding: EdgeInsets.all(8),
