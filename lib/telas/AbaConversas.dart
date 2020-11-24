@@ -96,16 +96,16 @@ class _AbaConversasState extends State<AbaConversas> {
               }
 
               return ListView.builder(
-                  itemCount: _listaConversas.length,
+                  itemCount: querySnapshot.docs.length,
                   itemBuilder: (context, indice){
 
                     List<DocumentSnapshot> conversas = querySnapshot.docs.toList();
                     DocumentSnapshot item = conversas[indice];
 
-                    String urlImagem  = item["caminhoFoto"];
-                    String tipo       = item["tipoMensagem"];
-                    String mensagem   = item["mensagem"];
-                    String nome       = item["nome"];
+                    String urlImagem  = item.data()["caminhoFoto"];
+                    String tipo       = item.data()["tipoMensagem"];
+                    String mensagem   = item.data()["mensagem"];
+                    String nome       = item.data()["nome"];
 
                     return ListTile(
                       contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),

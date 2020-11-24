@@ -22,12 +22,12 @@ class Conversa {
   Map<String, dynamic> toMap(){
 
     Map<String, dynamic> map = {
-      "_idRemetente"        : this._idRemetente,
-      "_idDestinatario"     : this._idDestinatario,
-      "_nome"               : this._nome,
-      "_mensagem"           : this._mensagem,
-      "_caminhoFoto"        : this._caminhoFoto,
-      "_tipoMensagem"        : this._tipoMensagem,
+      "idRemetente"        : this.idRemetente,
+      "idDestinatario"     : this.idDestinatario,
+      "nome"               : this.nome,
+      "mensagem"           : this.mensagem,
+      "caminhoFoto"        : this.caminhoFoto,
+      "tipoMensagem"        : this.tipoMensagem,
     };
     return map;
   }
