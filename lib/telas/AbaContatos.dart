@@ -36,7 +36,7 @@ class _AbaContatosState extends State<AbaContatos> {
 
   _recuperarDadosUsuario() async {
     FirebaseAuth auth = FirebaseAuth.instance;
-    User usuarioLogado = await auth.currentUser;
+    User usuarioLogado = auth.currentUser;
     _idUsuarioLogado = usuarioLogado.uid;
     _emailUsuarioLogado = usuarioLogado.email;
   }
