@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:whatsapp/model/Conversa.dart';
+import 'package:whatsapp/model/Usuario.dart';
 
 class AbaConversas extends StatefulWidget {
   @override
@@ -57,6 +58,12 @@ class _AbaConversasState extends State<AbaConversas> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    _controller.close();
+  }
+
+  @override
   Widget build(BuildContext context) {
 
     return StreamBuilder<QuerySnapshot>(
@@ -102,12 +109,26 @@ class _AbaConversasState extends State<AbaConversas> {
                     List<DocumentSnapshot> conversas = querySnapshot.docs.toList();
                     DocumentSnapshot item = conversas[indice];
 
-                    String urlImagem  = item.data()["caminhoFoto"];
-                    String tipo       = item.data()["tipoMensagem"];
-                    String mensagem   = item.data()["mensagem"];
-                    String nome       = item.data()["nome"];
+                    String urlImagem      = item.data()["caminhoFoto"];
+                    String tipo           = item.data()["tipoMensagem"];
+                    String mensagem       = item.data()["mensagem"];
+                    String nome           = item.data()["nome"];
+                    String idDestinatario = item.data()["idDestinatario"];
+
+
+                    Usuario usuario = Usuario();
+                    usuario.nome = nome;
+                    usuario.urlImagem = urlImagem;
+                    usuario.idUsuario = idDestinatario;
 
                     return ListTile(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/mensagens',
+                          arguments: usuario,
+                        );
+                      },
                       contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),
                       leading: CircleAvatar(
                         maxRadius: 30,
@@ -133,7 +154,6 @@ class _AbaConversasState extends State<AbaConversas> {
                           )
                       ),
                     );
-
                   }
               );
             }
