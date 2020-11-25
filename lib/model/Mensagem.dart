@@ -8,6 +8,9 @@ class Mensagem {
   //Define o tipo da mensagem, que pode ser "texto" ou "imagem"
   String _tipo;
 
+  //data para ordenar mensagens
+  String _data;
+
   Mensagem();
 
   Map<String, dynamic> toMap(){
@@ -17,10 +20,18 @@ class Mensagem {
       "mensagem" : this.mensagem,
       "urlImagem" : this.urlImagem,
       "tipo" : this.tipo,
+      "data" : this.data,
     };
 
     return map;
 
+  }
+
+
+  String get data => _data;
+
+  set data(String value) {
+    _data = value;
   }
 
   String get tipo => _tipo;

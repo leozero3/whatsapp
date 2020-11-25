@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -18,7 +20,7 @@ class Mensagens extends StatefulWidget {
 }
 
 class _MensagensState extends State<Mensagens> {
-
+  ///===========================================================================
   final _picker = ImagePicker();
   String _idUsuarioLogado;
   String _idUsuarioDestinatario;
@@ -26,6 +28,10 @@ class _MensagensState extends State<Mensagens> {
   bool _subindoImagem = false;
   TextEditingController _controllerMensagem = TextEditingController();
 
+  final _controller = StreamController<QuerySnapshot>.broadcast();
+  ScrollController _scrollController = ScrollController();
+
+  ///===========================================================================
   _enviarMensagem() {
     String textoMensagem = _controllerMensagem.text;
     if (textoMensagem.isNotEmpty) {
@@ -34,6 +40,7 @@ class _MensagensState extends State<Mensagens> {
       mensagem.mensagem = textoMensagem;
       mensagem.urlImagem = '';
       mensagem.tipo = 'texto';
+      mensagem.data = Timestamp.now().toString();
 
       /// Salvar mensagem remetente
       _salvarMesagem(_idUsuarioLogado, _idUsuarioDestinatario, mensagem);
@@ -42,12 +49,11 @@ class _MensagensState extends State<Mensagens> {
       _salvarMesagem(_idUsuarioDestinatario, _idUsuarioLogado, mensagem);
 
       /// Salvar conversa
-      _salvarConversa( mensagem );
+      _salvarConversa(mensagem);
     }
   }
 
-  _salvarConversa(Mensagem msg){
-
+  _salvarConversa(Mensagem msg) {
     /// Salvar conversa remetente
     Conversa cRemetente = Conversa();
     cRemetente.idRemetente = _idUsuarioLogado;
@@ -69,8 +75,13 @@ class _MensagensState extends State<Mensagens> {
     cDestinatario.salvar();
   }
 
-  _salvarMesagem(String idRemetente, String idDestinatario, Mensagem msg) async {
-    await db.collection('mensagens').doc(idRemetente).collection(idDestinatario).add(msg.toMap());
+  _salvarMesagem(
+      String idRemetente, String idDestinatario, Mensagem msg) async {
+    await db
+        .collection('mensagens')
+        .doc(idRemetente)
+        .collection(idDestinatario)
+        .add(msg.toMap());
 
     //Limpa caixa de texto
     _controllerMensagem.clear();
@@ -124,6 +135,7 @@ class _MensagensState extends State<Mensagens> {
     mensagem.mensagem = '';
     mensagem.urlImagem = url;
     mensagem.tipo = 'imagem';
+    mensagem.data = Timestamp.now().toString();
 
     /// Salvar mensagem remetente
     _salvarMesagem(_idUsuarioLogado, _idUsuarioDestinatario, mensagem);
@@ -138,6 +150,26 @@ class _MensagensState extends State<Mensagens> {
     _idUsuarioLogado = usuarioLogado.uid;
 
     _idUsuarioDestinatario = widget.contato.idUsuario;
+
+    _adicionarListenerMensagens();
+  }
+
+  Stream<QuerySnapshot> _adicionarListenerMensagens() {
+    final stream = db
+        .collection("mensagens")
+        .doc(_idUsuarioLogado)
+        .collection(_idUsuarioDestinatario)
+        .orderBy('data', descending: false)
+        .snapshots();
+
+    stream.listen((dados) {
+      _controller.add(dados);
+
+      ///  \/ faz o scroll descer automaticamente
+      Timer(Duration(seconds: 1), () {
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      });
+    });
   }
 
   @override
@@ -169,10 +201,10 @@ class _MensagensState extends State<Mensagens> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(32),
                   ),
-                  prefixIcon:
-                  _subindoImagem
+                  prefixIcon: _subindoImagem
                       ? CircularProgressIndicator()
-                      : IconButton(icon: Icon(Icons.camera_alt),onPressed: _enviarFoto),
+                      : IconButton(
+                          icon: Icon(Icons.camera_alt), onPressed: _enviarFoto),
                 ),
               ),
             ),
@@ -189,18 +221,17 @@ class _MensagensState extends State<Mensagens> {
 
     /// TELA DE CONVERSA =======================================================
     var stream = StreamBuilder(
-      stream: db
-          .collection("mensagens")
-          .doc(_idUsuarioLogado)
-          .collection(_idUsuarioDestinatario)
-          .snapshots(),
+      stream: _controller.stream,
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.none:
           case ConnectionState.waiting:
             return Center(
               child: Column(
-                children: <Widget>[Text("Carregando mensagens"), CircularProgressIndicator()],
+                children: <Widget>[
+                  Text("Carregando mensagens"),
+                  CircularProgressIndicator()
+                ],
               ),
             );
             break;
@@ -215,13 +246,16 @@ class _MensagensState extends State<Mensagens> {
             } else {
               return Expanded(
                 child: ListView.builder(
+                    controller: _scrollController,
                     itemCount: querySnapshot.docs.length,
                     itemBuilder: (context, indice) {
                       //recupera mensagem
-                      List<DocumentSnapshot> mensagens = querySnapshot.docs.toList();
+                      List<DocumentSnapshot> mensagens =
+                          querySnapshot.docs.toList();
                       DocumentSnapshot item = mensagens[indice];
 
-                      double larguraContainer = MediaQuery.of(context).size.width * 0.8;
+                      double larguraContainer =
+                          MediaQuery.of(context).size.width * 0.8;
 
                       //Define cores e alinhamentos
                       Alignment alinhamento = Alignment.centerRight;
@@ -239,11 +273,16 @@ class _MensagensState extends State<Mensagens> {
                             width: larguraContainer,
                             padding: EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                                color: cor, borderRadius: BorderRadius.all(Radius.circular(8))),
+                                color: cor,
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(8))),
                             child: //Text(item["mensagem"], style: TextStyle(fontSize: 18),
-                            item["tipo"] == "texto"
-                                ? Text(item["mensagem"],style: TextStyle(fontSize: 18),)
-                                : Image.network(item["urlImagem"]),
+                                item["tipo"] == "texto"
+                                    ? Text(
+                                        item["mensagem"],
+                                        style: TextStyle(fontSize: 18),
+                                      )
+                                    : Image.network(item["urlImagem"]),
                           ),
                         ),
                       );
@@ -276,7 +315,8 @@ class _MensagensState extends State<Mensagens> {
       body: Container(
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
-            image: DecorationImage(image: AssetImage("assets/imagens/bg.png"), fit: BoxFit.cover)),
+            image: DecorationImage(
+                image: AssetImage("assets/imagens/bg.png"), fit: BoxFit.cover)),
         child: SafeArea(
           child: Container(
             padding: EdgeInsets.all(8),

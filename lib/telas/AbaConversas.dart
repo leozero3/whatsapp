@@ -35,7 +35,6 @@ class _AbaConversasState extends State<AbaConversas> {
   }
 
   Stream<QuerySnapshot> _adicionarListenerConversas(){
-
     final stream = db.collection("conversas")
         .doc( _idUsuarioLogado )
         .collection("ultima_conversa")
@@ -44,7 +43,6 @@ class _AbaConversasState extends State<AbaConversas> {
     stream.listen((dados){
       _controller.add( dados );
     });
-
   }
 
   _recuperarDadosUsuario() async {
